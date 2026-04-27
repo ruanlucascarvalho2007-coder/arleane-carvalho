@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Arleane Carvalho — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'Manrope',sans-serif;background:#f9f9f9;color:#1a1c1c;}
+button,input,select,textarea{font-family:'Manrope',sans-serif;}
+a{text-decoration:none;color:inherit;}
+img{display:block;}
+
+/* ── VARS ── */
+:root{
+  --primary:#442a22;
+  --primary-container:#5d4037;
+  --on-primary:#fff;
+  --secondary:#5e604d;
+  --tertiary:#735c00;
+  --surface:#f9f9f9;
+  --surface-container:#eeeeee;
+  --surface-container-low:#f4f3f3;
+  --surface-container-high:#e8e8e8;
+  --outline:#827470;
+  --outline-variant:#d4c3be;
+  --on-surface:#1a1c1c;
+  --on-surface-variant:#504441;
+  --error:#ba1a1a;
+  --sidebar-w:280px;
+  --topbar-h:64px;
+  --gold:#D4AF37;
+  --green-badge:#166534;
+  --green-badge-bg:#f0fdf4;
+  --yellow-badge:#92400e;
+  --yellow-badge-bg:#fefce8;
+  --red-badge:#991b1b;
+  --red-badge-bg:#fef2f2;
+  --gray-badge:#374151;
+  --gray-badge-bg:#f3f4f6;
+}
+
+/* ── MATERIAL ICONS ── */
+.material-symbols-outlined{
+  font-variation-settings:'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24;
+  font-size:20px;line-height:1;vertical-align:middle;
+}
+
+/* ════════════════════════════
+   LOGIN
+════════════════════════════ */
+#login-screen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:var(--surface-container-low);
+}
+.login-box{
+  background:#fff;border-radius:20px;padding:48px 40px;
+  width:100%;max-width:400px;
+  box-shadow:0 10px 40px -10px rgba(93,64,55,.12);
+  border:1px solid var(--outline-variant);
+}
+.login-brand{
+  font-size:20px;font-weight:700;color:var(--primary);
+  margin-bottom:4px;letter-spacing:-.3px;
+}
+.login-desc{font-size:13px;color:var(--outline);margin-bottom:32px;}
+.lbl{
+  display:block;font-size:11px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:6px;
+}
+.linput{
+  width:100%;padding:11px 14px;border:1px solid var(--outline-variant);
+  border-radius:10px;font-size:14px;color:var(--on-surface);
+  background:var(--surface-container-low);outline:none;
+  transition:border-color .2s;margin-bottom:16px;
+}
+.linput:focus{border-color:var(--primary-container);}
+.login-btn{
+  width:100%;padding:13px;background:var(--primary);color:#fff;
+  border:none;border-radius:10px;font-size:14px;font-weight:600;
+  cursor:pointer;transition:opacity .2s;margin-top:4px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.login-btn:hover{opacity:.88;}
+.login-err{font-size:12px;color:var(--error);text-align:center;margin-top:12px;min-height:16px;}
+
+/* ════════════════════════════
+   LAYOUT APP
+════════════════════════════ */
+#app{display:none;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);
+  background:#fafaf8;border-right:1px solid #e7e0db;
+  display:flex;flex-direction:column;padding:24px;z-index:100;
+}
+.sidebar-brand{font-size:18px;font-weight:700;color:#1c1108;letter-spacing:-.3px;}
+.sidebar-sub{font-size:12px;color:#a09080;margin-top:2px;margin-bottom:28px;}
+.sidebar-divider{height:1px;background:#e7e0db;margin:16px 0;}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;border-radius:10px;
+  font-size:14px;font-weight:500;color:#6b5242;
+  cursor:pointer;transition:background .15s,color .15s;
+  border:none;background:transparent;width:100%;text-align:left;
+  margin-bottom:2px;
+}
+.nav-item .material-symbols-outlined{font-size:20px;color:#9e7f6e;}
+.nav-item:hover{background:#f0ebe6;color:#1c1108;}
+.nav-item:hover .material-symbols-outlined{color:#5d4037;}
+.nav-item.active{background:#ede3db;color:var(--primary);font-weight:600;}
+.nav-item.active .material-symbols-outlined{color:var(--primary-container);}
+.sidebar-footer{margin-top:auto;}
+.new-patient-btn{
+  width:100%;padding:12px;background:var(--primary);color:#fff;
+  border:none;border-radius:10px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:16px;
+}
+.new-patient-btn:hover{opacity:.88;}
+
+/* TOPBAR */
+.topbar{
+  position:fixed;top:0;right:0;
+  width:calc(100% - var(--sidebar-w));height:var(--topbar-h);
+  background:rgba(255,255,255,.85);backdrop-filter:blur(12px);
+  border-bottom:1px solid #f0ebe6;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;z-index:99;
+}
+.search-wrap{position:relative;flex:1;max-width:440px;}
+.search-wrap .material-symbols-outlined{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  color:#a09080;font-size:18px;
+}
+.search-input{
+  width:100%;padding:9px 14px 9px 38px;
+  border:1px solid #ede3db;border-radius:10px;
+  font-size:13px;color:var(--on-surface);background:#f9f6f3;
+  outline:none;transition:border-color .2s;
+}
+.search-input:focus{border-color:var(--primary-container);}
+.topbar-right{display:flex;align-items:center;gap:20px;}
+.new-ag-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:9px 18px;background:var(--primary);color:#fff;
+  border:none;border-radius:10px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:opacity .15s,transform .1s;
+}
+.new-ag-btn:hover{opacity:.88;}
+.new-ag-btn:active{transform:scale(.98);}
+.topbar-icon-btn{
+  background:none;border:none;cursor:pointer;color:#a09080;
+  display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:8px;
+  transition:background .15s,color .15s;
+}
+.topbar-icon-btn:hover{background:#f0ebe6;color:var(--primary);}
+.avatar{
+  width:34px;height:34px;border-radius:50%;overflow:hidden;
+  border:2px solid #e7e0db;cursor:pointer;
+  background:var(--outline-variant);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--primary-container);
+}
+
+/* MAIN */
+.main-content{
+  margin-left:var(--sidebar-w);
+  padding-top:var(--topbar-h);
+  min-height:100vh;
+}
+.page{display:none;padding:32px 32px 48px;}
+.page.active{display:block;}
+.page-title{font-size:24px;font-weight:700;color:var(--primary);letter-spacing:-.4px;}
+.page-subtitle{font-size:14px;color:var(--outline);margin-top:4px;margin-bottom:28px;}
+
+/* ════════════════════════════
+   STATS CARDS
+════════════════════════════ */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{
+  background:#fff;border:1px solid #f0ebe6;border-radius:14px;
+  padding:20px 24px;
+  box-shadow:0 2px 12px -4px rgba(93,64,55,.06);
+}
+.stat-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a09080;margin-bottom:10px;}
+.stat-row{display:flex;align-items:flex-end;justify-content:space-between;}
+.stat-val{font-size:32px;font-weight:700;color:var(--primary);letter-spacing:-1px;line-height:1;}
+.stat-chip{font-size:11px;font-weight:700;color:#166534;}
+.stat-icon{font-size:24px;opacity:.35;}
+
+/* ════════════════════════════
+   TABELA
+════════════════════════════ */
+.table-card{
+  background:#fff;border:1px solid #f0ebe6;border-radius:14px;
+  overflow:hidden;box-shadow:0 2px 12px -4px rgba(93,64,55,.06);
+}
+.filter-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid #faf6f3;flex-wrap:wrap;gap:12px;
+}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap;}
+.fpill{
+  padding:7px 18px;border-radius:9999px;font-size:12px;font-weight:700;
+  border:none;cursor:pointer;transition:background .15s,color .15s;
+  background:#f4f0ec;color:#6b5242;
+}
+.fpill:hover{background:#e8dfd8;color:var(--primary);}
+.fpill.active{background:var(--primary);color:#fff;}
+.filter-actions{display:flex;gap:8px;}
+.filter-action-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border:1px solid #e7e0db;border-radius:8px;
+  font-size:12px;font-weight:600;color:#6b5242;background:#fff;
+  cursor:pointer;transition:background .15s;
+}
+.filter-action-btn:hover{background:#f4f0ec;}
+
+/* TABLE */
+.table-scroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:700px;}
+thead tr{background:#faf6f3;}
+th{
+  padding:12px 24px;text-align:left;
+  font-size:11px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:#a09080;white-space:nowrap;
+}
+td{padding:16px 24px;border-top:1px solid #faf6f3;vertical-align:middle;}
+tbody tr{transition:background .12s;}
+tbody tr:hover{background:#fdf9f7;}
+
+.client-cell{display:flex;align-items:center;gap:12px;}
+.initials{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--surface-container);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:var(--primary);flex-shrink:0;
+}
+.client-name{font-size:14px;font-weight:600;color:#1c1108;}
+.client-phone{font-size:11px;color:#a09080;margin-top:1px;}
+.service-text{font-size:13px;color:#504441;}
+.date-text{font-size:13px;color:#504441;}
+.time-text{font-size:13px;color:#504441;font-weight:500;}
+
+/* STATUS BADGES */
+.badge{
+  display:inline-flex;align-items:center;
+  padding:4px 12px;border-radius:9999px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  white-space:nowrap;
+}
+.badge-confirmado{background:var(--green-badge-bg);color:var(--green-badge);}
+.badge-pendente{background:var(--yellow-badge-bg);color:var(--yellow-badge);}
+.badge-cancelado{background:var(--red-badge-bg);color:var(--red-badge);}
+.badge-concluido{background:var(--gray-badge-bg);color:var(--gray-badge);}
+
+/* AÇÕES */
+.actions-cell{display:flex;align-items:center;justify-content:flex-end;gap:4px;}
+.action-icon{
+  width:34px;height:34px;border-radius:8px;border:none;background:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  color:#c4b0a8;transition:background .15s,color .15s;
+}
+.action-icon:hover:not(:disabled){background:#f4f0ec;}
+.action-icon.confirm:hover:not(:disabled){background:#f0fdf4;color:#166534;}
+.action-icon.cancel:hover:not(:disabled){background:#fef2f2;color:#991b1b;}
+.action-icon.done:hover:not(:disabled){background:#f3f4f6;color:#374151;}
+.action-icon.whatsapp:hover:not(:disabled){background:#f0fdf4;color:#15803d;}
+.action-icon:disabled{opacity:.3;cursor:not-allowed;}
+
+/* PAGINAÇÃO */
+.pagination-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;border-top:1px solid #faf6f3;
+}
+.page-count{font-size:12px;color:#a09080;}
+.page-btns{display:flex;gap:6px;}
+.page-btn{
+  width:32px;height:32px;border-radius:8px;border:1px solid #e7e0db;
+  background:#fff;font-size:12px;font-weight:600;color:#6b5242;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.page-btn:hover{background:#f4f0ec;}
+.page-btn.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+.page-btn-arrow{background:#fff;border:1px solid #e7e0db;}
+
+/* ════════════════════════════
+   INSIGHTS CARDS
+════════════════════════════ */
+.insights-row{display:flex;gap:16px;margin-top:24px;flex-wrap:wrap;}
+.insight-dark{
+  flex:1;min-width:300px;background:#5d4037;color:#ffdbd0;
+  border-radius:16px;padding:32px;position:relative;overflow:hidden;
+}
+.insight-dark h4{font-size:18px;font-weight:700;margin-bottom:8px;}
+.insight-dark p{font-size:13px;opacity:.8;max-width:340px;line-height:1.6;margin-bottom:24px;}
+.insight-gold-btn{
+  display:inline-block;padding:9px 20px;background:var(--gold);
+  color:#2c160e;border:none;border-radius:8px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:filter .15s;
+}
+.insight-gold-btn:hover{filter:brightness(1.1);}
+.insight-deco{
+  position:absolute;right:-30px;bottom:-30px;
+  width:160px;height:160px;background:var(--gold);
+  opacity:.08;border-radius:50%;filter:blur(40px);pointer-events:none;
+}
+.insight-light{
+  width:320px;min-width:280px;background:#fff;
+  border:1px solid #f0ebe6;border-radius:16px;padding:28px;
+  box-shadow:0 2px 12px -4px rgba(93,64,55,.06);
+}
+.insight-light-head{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+.insight-light-icon{
+  width:44px;height:44px;background:#f4f0ec;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;color:var(--primary-container);
+}
+.insight-light-title{font-size:13px;font-weight:700;color:var(--primary);}
+.insight-light-desc{font-size:13px;color:#6b5242;line-height:1.6;margin-bottom:14px;}
+.progress-bar-bg{width:100%;height:8px;background:#f0ebe6;border-radius:9999px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:9999px;transition:width .6s ease;}
+
+/* ════════════════════════════
+   MODAL GENÉRICO
+════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(28,17,8,.45);
+  backdrop-filter:blur(4px);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal-box{
+  background:#fff;border-radius:20px;width:100%;max-width:540px;
+  box-shadow:0 24px 80px rgba(0,0,0,.18);
+  transform:scale(.96) translateY(8px);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;
+}
+.modal-overlay.open .modal-box{transform:scale(1) translateY(0);}
+.modal-head{
+  padding:28px 28px 18px;display:flex;justify-content:space-between;align-items:flex-start;
+}
+.modal-title{font-size:20px;font-weight:700;color:var(--primary);}
+.modal-subtitle{font-size:13px;color:var(--outline);margin-top:2px;}
+.modal-close-btn{
+  width:30px;height:30px;border-radius:8px;border:none;background:#f4f0ec;
+  cursor:pointer;color:#6b5242;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-left:12px;transition:background .15s;
+}
+.modal-close-btn:hover{background:#e8dfd8;}
+.modal-body{padding:0 28px 24px;}
+.modal-field{margin-bottom:18px;}
+.modal-label{
+  display:block;font-size:11px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--on-surface-variant);margin-bottom:6px;
+}
+.modal-input-wrap{position:relative;display:flex;align-items:center;}
+.modal-input-icon{
+  position:absolute;left:12px;color:#c4b0a8;font-size:18px;pointer-events:none;
+}
+.modal-input{
+  width:100%;padding:11px 14px 11px 38px;border:1px solid #e7e0db;
+  border-radius:10px;font-size:14px;color:var(--on-surface);background:#faf8f6;
+  outline:none;transition:border-color .2s;
+}
+.modal-input.no-icon{padding-left:14px;}
+.modal-input:focus{border-color:var(--primary-container);}
+.modal-input-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.modal-footer{
+  display:flex;gap:12px;justify-content:flex-end;
+  padding:18px 28px 28px;border-top:1px solid #faf6f3;
+}
+.modal-cancel-btn{
+  padding:11px 24px;border:1px solid #e7e0db;border-radius:10px;
+  background:#fff;font-size:14px;font-weight:600;color:#6b5242;cursor:pointer;
+  transition:background .15s;
+}
+.modal-cancel-btn:hover{background:#f4f0ec;}
+.modal-submit-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 24px;border-radius:10px;border:none;
+  background:var(--primary);color:#fff;font-size:14px;font-weight:600;
+  cursor:pointer;transition:opacity .15s;
+}
+.modal-submit-btn:hover{opacity:.88;}
+
+/* ════════════════════════════
+   MODAL DETALHES
+════════════════════════════ */
+.detail-modal-box{max-width:600px;}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:0 28px 24px;}
+.detail-field-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a09080;margin-bottom:6px;}
+.detail-field-val{font-size:15px;font-weight:600;color:#1c1108;}
+.detail-field-val.with-icon{display:flex;align-items:center;gap:6px;}
+.detail-field-val .material-symbols-outlined{font-size:16px;color:var(--outline);}
+.detail-client-row{display:flex;align-items:center;gap:12px;}
+.detail-initials{
+  width:42px;height:42px;border-radius:50%;background:var(--surface-container);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--primary);flex-shrink:0;
+}
+.detail-name{font-size:16px;font-weight:700;color:#1c1108;}
+.service-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;background:#faf6f3;border:1px solid #e7e0db;
+  border-radius:9999px;font-size:13px;font-weight:600;color:var(--primary);
+}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#d97706;flex-shrink:0;}
+.status-dot.confirmed{background:#166534;}
+.status-dot.canceled{background:#991b1b;}
+.status-dot.done{background:#374151;}
+.status-label-inline{font-size:13px;font-weight:600;}
+.obs-block{padding:0 28px 20px;}
+.obs-label{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#a09080;margin-bottom:8px;}
+.obs-box{
+  padding:14px;background:#faf8f6;border:1px solid #e7e0db;
+  border-radius:10px;font-size:13px;font-style:italic;color:#504441;
+  line-height:1.6;min-height:70px;
+}
+.obs-textarea{
+  width:100%;padding:12px 14px;background:#faf8f6;border:1px solid #e7e0db;
+  border-radius:10px;font-size:13px;color:#1c1108;line-height:1.6;
+  resize:vertical;min-height:80px;outline:none;transition:border-color .2s;
+}
+.obs-textarea:focus{border-color:var(--primary-container);}
+.detail-footer{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  padding:18px 28px 28px;border-top:1px solid #faf6f3;
+}
+.detail-action-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 10px;border-radius:10px;border:1px solid #e7e0db;
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  cursor:pointer;background:#fff;color:#6b5242;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.detail-action-btn:hover:not(:disabled){border-color:currentColor;}
+.detail-action-btn:disabled{opacity:.35;cursor:not-allowed;}
+.detail-action-btn.btn-cancel:hover:not(:disabled){background:#fef2f2;color:#991b1b;border-color:#fca5a5;}
+.detail-action-btn.btn-confirm:hover:not(:disabled){background:#f0fdf4;color:#166534;border-color:#86efac;}
+.detail-action-btn.btn-wa:hover:not(:disabled){background:#f0fdf4;color:#15803d;border-color:#86efac;}
+.detail-action-btn.btn-done{background:var(--primary);color:#fff;border-color:var(--primary);}
+.detail-action-btn.btn-done:hover:not(:disabled){background:var(--primary-container);}
+
+/* ════════════════════════════
+   TOAST
+════════════════════════════ */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:999;
+  padding:13px 20px;border-radius:12px;
+  font-size:13px;font-weight:600;color:#fff;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  transform:translateY(60px);opacity:0;
+  transition:transform .3s ease,opacity .3s ease;
+  pointer-events:none;background:var(--primary);
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{background:#166534;}
+.toast.err{background:#991b1b;}
+
+/* ════════════════════════════
+   EMPTY / LOADING
+════════════════════════════ */
+.empty-state{text-align:center;padding:56px 20px;color:#a09080;}
+.empty-icon{font-size:40px;opacity:.3;margin-bottom:10px;}
+.loading-row{text-align:center;padding:40px;color:#a09080;font-size:13px;}
+
+/* ════════════════════════════
+   RESPONSIVE
+════════════════════════════ */
+
+@media(max-width:768px){
+  :root{ --sidebar-w:0px; --topbar-h:0px; }
+
+  .sidebar, .topbar { display:none !important; }
+  .main-content { margin-left:0; padding-top:0; }
+
+  /* ── MOBILE HEADER ── */
+  .mobile-header {
+    display:flex !important;
+    align-items:center; justify-content:space-between;
+    padding:16px 20px;
+    background:#fff;
+    border-bottom:1px solid #f0ebe6;
+    position:sticky; top:0; z-index:50;
+  }
+  .mobile-header-title {
+    font-size:11px; font-weight:800; letter-spacing:2.5px;
+    text-transform:uppercase; color:var(--primary);
+  }
+  .mobile-avatar {
+    width:36px; height:36px; border-radius:50%;
+    background:var(--primary); color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:700; cursor:pointer; flex-shrink:0;
+  }
+
+  /* ── BOTTOM NAV ── */
+  .mobile-nav {
+    display:flex !important;
+    position:fixed; bottom:0; left:0; right:0;
+    background:#fff; border-top:1px solid #f0ebe6;
+    z-index:100;
+    padding:8px 0 max(8px, env(safe-area-inset-bottom));
+  }
+  .mob-nav-item {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:3px;
+    padding:6px; cursor:pointer;
+    font-size:9px; font-weight:700; letter-spacing:.8px;
+    text-transform:uppercase; color:#a09080;
+    border:none; background:none; transition:color .15s;
+  }
+  .mob-nav-item .material-symbols-outlined { font-size:22px; }
+  .mob-nav-item.active { color:var(--primary); }
+  .mob-nav-item.active .material-symbols-outlined {
+    font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;
+  }
+
+  /* ── FAB ── */
+  .fab {
+    display:flex !important;
+    position:fixed; bottom:72px; right:16px;
+    width:52px; height:52px; border-radius:50%;
+    background:var(--primary); color:#fff;
+    border:none; cursor:pointer; z-index:49;
+    align-items:center; justify-content:center;
+    box-shadow:0 4px 20px rgba(68,42,34,.3);
+    transition:transform .15s;
+  }
+  .fab:hover { transform:scale(1.08); }
+  .fab .material-symbols-outlined { font-size:24px; }
+
+  /* ── PAGES ── */
+  .page { padding:20px 16px 100px; }
+
+  /* ── STATS ── */
+  .stats-grid { grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+  .stat-card { padding:14px; }
+  .stat-val { font-size:24px; }
+
+  /* ── FILTROS ── */
+  .filter-bar {
+    padding:10px 12px; flex-wrap:nowrap;
+    overflow-x:auto; gap:8px; scrollbar-width:none;
+  }
+  .filter-bar::-webkit-scrollbar { display:none; }
+  .filter-pills { flex-wrap:nowrap; gap:6px; }
+  .fpill { white-space:nowrap; padding:7px 14px; font-size:11px; }
+  .filter-actions { display:none; }
+
+  /* ── TABELA → CARDS ── */
+  .table-scroll { overflow-x:unset; }
+  table, thead, tbody, th, td, tr { display:block; }
+  thead { display:none; }
+  .table-card { border-radius:14px; }
+
+  tbody tr {
+    border:none;
+    border-bottom:1px solid #f0ebe6;
+    border-radius:0;
+    margin:0;
+    padding:14px 16px;
+    display:grid;
+    grid-template-columns:1fr auto;
+    grid-template-rows:auto auto auto auto;
+    gap:4px;
+  }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:#fdf9f7; }
+
+  /* cliente ocupa linha inteira */
+  td:nth-child(1) { grid-column:1/3; }
+  /* serviço */
+  td:nth-child(2) { grid-column:1; padding-left:44px; font-size:12px; color:#6b5242; }
+  /* data */
+  td:nth-child(3) { grid-column:1; padding-left:44px; font-size:12px; color:#a09080; }
+  /* horario */
+  td:nth-child(4) { grid-column:1; padding-left:44px; font-size:12px; font-weight:600; color:var(--primary); }
+  /* status */
+  td:nth-child(5) { grid-column:1; padding-left:44px; padding-top:2px; }
+  /* ações */
+  td:nth-child(6) { grid-column:1; padding-left:44px; padding-top:8px; }
+
+  .actions-cell { justify-content:flex-start; gap:6px; }
+  .action-icon { width:34px; height:34px; border-radius:8px; }
+
+  /* ── PAGINAÇÃO ── */
+  .pagination-bar { flex-direction:column; gap:8px; align-items:center; padding:12px 16px; }
+
+  /* ── MODAL MOBILE — bottom sheet ── */
+  .modal-overlay { align-items:flex-end; padding:0; }
+  .modal-box {
+    border-radius:20px 20px 0 0;
+    max-height:88svh;
+    overflow-y:auto;
+    width:100%;
+    max-width:100%;
+  }
+
+  /* ── MODAL DETALHES — corrige data/hora e botões ── */
+  .detail-grid {
+    grid-template-columns:1fr;
+    gap:14px;
+    padding:0 20px 16px;
+  }
+  .detail-footer {
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:14px 20px 20px;
+  }
+  .detail-action-btn {
+    padding:12px 8px;
+    font-size:11px;
+  }
+  /* data não quebra linha */
+  .detail-field-val.with-icon {
+    flex-wrap:nowrap;
+    align-items:center;
+    gap:4px;
+    font-size:14px;
+  }
+
+  /* ── BLOQUEIOS — coluna única ── */
+  #page-bloqueios > div {
+    grid-template-columns:1fr !important;
+    gap:16px;
+  }
+  #bloqueios-list {
+    margin-top:0;
+  }
+
+  /* ── INSIGHTS ── */
+  .insights-row { flex-direction:column; }
+  .insight-light { width:100%; min-width:unset; }
+
+  /* ── PACIENTES — cards ── */
+ #pac-body td:nth-child(5) { 
+  padding-left:44px; 
+  padding-top:8px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+#pac-body td:nth-child(5) .action-icon {
+  width:36px; height:36px; border-radius:10px;
+  background:#f4f0ec; display:flex;
+  align-items:center; justify-content:center;
+}
+
+
+  /* ── CONFIGURAÇÕES ── */
+  .block-form-cfg { grid-template-columns:1fr !important; }
+}
+
+/* esconde no desktop */
+.mobile-header, .mobile-nav, .fab { display:none; }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════
+     LOGIN
+════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-brand">Arleane Carvalho</div>
+    <div class="login-desc">Painel Administrativo</div>
+    <label class="lbl" for="le">E-mail</label>
+    <input class="linput" id="le" type="email" placeholder="seu@email.com" autocomplete="email"/>
+    <label class="lbl" for="lp">Senha</label>
+    <input class="linput" id="lp" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">
+      <span class="material-symbols-outlined" style="font-size:18px;">lock_open</span>
+      Entrar
+    </button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     APP
+════════════════════════════ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+    <div class="sidebar-brand" id="sidebar-brand">Arleane Carvalho</div>
+      <div class="sidebar-sub">Admin Management</div>
+    </div>
+    <nav>
+      <button class="nav-item active" onclick="showPage('agendamentos',this)">
+        <span class="material-symbols-outlined">calendar_today</span>
+        <span class="nav-label">Agendamentos</span>
+      </button>
+      <button class="nav-item" onclick="showPage('pacientes',this)">
+        <span class="material-symbols-outlined">group</span>
+        <span class="nav-label">Pacientes</span>
+      </button>
+      <button class="nav-item" onclick="showPage('bloqueios',this)">
+        <span class="material-symbols-outlined">block</span>
+        <span class="nav-label">Bloqueios</span>
+      </button>
+      <button class="nav-item" onclick="showPage('configuracoes',this)">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="nav-label">Configurações</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-divider"></div>
+      <button class="nav-item" onclick="doLogout()">
+        <span class="material-symbols-outlined">logout</span>
+        <span class="nav-label">Sair</span>
+      </button>
+      <button class="new-patient-btn" onclick="openNovoAg()">
+        <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+        Novo Paciente
+      </button>
+    </div>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="search-wrap">
+      <span class="material-symbols-outlined">search</span>
+      <input class="search-input" id="search-input" type="text" placeholder="Buscar agendamento por nome..." oninput="renderTable()"/>
+    </div>
+    <div class="topbar-right">
+      <button class="new-ag-btn" onclick="openNovoAg()">
+        <span class="material-symbols-outlined" style="font-size:18px;">add</span>
+        Novo Agendamento
+      </button>
+      <button class="topbar-icon-btn">
+        <span class="material-symbols-outlined">notifications</span>
+      </button>
+      <div class="avatar" id="user-avatar">AC</div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+<!-- MOBILE HEADER -->
+<div class="mobile-header" id="mob-header">
+  <div class="mobile-header-title" id="mobile-header-name">ARLEANE CARVALHO</div>
+  <div class="mobile-avatar" id="mob-avatar">AC</div>
+</div>
+
+
+    <!-- ══ AGENDAMENTOS ══ -->
+    <div class="page active" id="page-agendamentos">
+      <div class="page-title">Agendamentos</div>
+      <div class="page-subtitle">Gerencie os horários e atendimentos do Studio Arleane Carvalho.</div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Hoje</div>
+          <div class="stat-row">
+            <div class="stat-val" id="st-hoje">—</div>
+            <span class="stat-chip" id="st-hoje-pct"></span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pendentes</div>
+          <div class="stat-row">
+            <div class="stat-val" style="color:var(--tertiary)" id="st-pend">—</div>
+            <span class="material-symbols-outlined stat-icon" style="color:var(--tertiary)">hourglass_empty</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Confirmados</div>
+          <div class="stat-row">
+            <div class="stat-val" style="color:#14532d" id="st-conf">—</div>
+            <span class="material-symbols-outlined stat-icon" style="color:#14532d">check_circle</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Este Mês</div>
+          <div class="stat-row">
+            <div class="stat-val" style="color:#1c1108" id="st-mes">—</div>
+            <span style="font-size:11px;color:#a09080;font-weight:500" id="st-meta"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TABELA -->
+      <div class="table-card">
+        <div class="filter-bar">
+          <div class="filter-pills">
+            <button class="fpill active" onclick="setFilter('todos',this)">Todos</button>
+            <button class="fpill" onclick="setFilter('pendente',this)">Pendentes</button>
+            <button class="fpill" onclick="setFilter('confirmado',this)">Confirmados</button>
+            <button class="fpill" onclick="setFilter('cancelado',this)">Cancelados</button>
+            <button class="fpill" onclick="setFilter('concluido',this)">Concluídos</button>
+          </div>
+          <div class="filter-actions">
+            <button class="filter-action-btn" onclick="loadAgendamentos()">
+              <span class="material-symbols-outlined" style="font-size:16px;">refresh</span>
+              Atualizar
+            </button>
+            <button class="filter-action-btn">
+              <span class="material-symbols-outlined" style="font-size:16px;">download</span>
+              Exportar
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Serviço</th>
+                <th>Data</th>
+                <th>Horário</th>
+                <th>Status</th>
+                <th style="text-align:right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <tr><td colspan="6" class="loading-row">Carregando agendamentos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <span class="page-count" id="page-count">—</span>
+          <div class="page-btns" id="page-btns"></div>
+        </div>
+      </div>
+
+      <!-- INSIGHTS -->
+      <div class="insights-row">
+        <div class="insight-dark">
+          <div class="insight-deco"></div>
+          <h4>Dica Premium</h4>
+          <p>Você tem clientes com tratamentos recorrentes que ainda não agendaram este mês. Considere enviar um lembrete personalizado via WhatsApp.</p>
+          <button class="insight-gold-btn">Enviar Lembretes</button>
+        </div>
+        <div class="insight-light">
+          <div class="insight-light-head">
+            <div class="insight-light-icon">
+              <span class="material-symbols-outlined">auto_awesome</span>
+            </div>
+            <div class="insight-light-title">Previsão de Agenda</div>
+          </div>
+          <p class="insight-light-desc">Sua taxa de ocupação para os próximos 7 dias está em <strong style="color:#1c1108" id="ocupacao-pct">—</strong>.</p>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="ocupacao-bar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+ <div class="page" id="page-pacientes">
+  <div class="page-title">Pacientes</div>
+  <div class="page-subtitle">Histórico de clientes que já agendaram.</div>
+
+  <div class="table-card">
+    <div class="filter-bar">
+      <div class="search-wrap" style="max-width:360px;">
+        <span class="material-symbols-outlined">search</span>
+        <input class="search-input" id="pac-search" type="text"
+          placeholder="Buscar paciente..." oninput="renderPacientes()"/>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Último serviço</th>
+            <th>Última visita</th>
+            <th>Total de visitas</th>
+            <th style="text-align:right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="pac-body">
+          <tr><td colspan="5" class="loading-row">Carregando...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="openNovoAg()" title="Novo agendamento">
+  <span class="material-symbols-outlined">add</span>
+</button>
+
+<!-- BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mob-nav-item active" id="mobnav-agendamentos" onclick="showPage('agendamentos',null);setMobNav('agendamentos')">
+    <span class="material-symbols-outlined">calendar_today</span>
+    AGENDA
+  </button>
+  <button class="mob-nav-item" id="mobnav-pacientes" onclick="showPage('pacientes',null);setMobNav('pacientes')">
+    <span class="material-symbols-outlined">group</span>
+    PACIENTES
+  </button>
+  <button class="mob-nav-item" id="mobnav-bloqueios" onclick="showPage('bloqueios',null);setMobNav('bloqueios')">
+    <span class="material-symbols-outlined">block</span>
+    BLOQUEIOS
+  </button>
+  <button class="mob-nav-item" id="mobnav-configuracoes" onclick="showPage('configuracoes',null);setMobNav('configuracoes')">
+    <span class="material-symbols-outlined">settings</span>
+    CONFIG
+  </button>
+</nav>
+
+
+<!-- MODAL PRONTUÁRIO -->
+<div class="modal-overlay" id="modal-prontuario">
+  <div class="modal-box" style="max-width:640px;">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Prontuário</div>
+        <div class="modal-subtitle" id="pron-subtitle">—</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('modal-prontuario')">
+        <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Histórico de agendamentos -->
+      <div style="margin-bottom:20px;">
+        <div class="modal-label" style="margin-bottom:8px;">Histórico de agendamentos</div>
+        <div id="pron-historico" style="display:flex;flex-direction:column;gap:6px;max-height:160px;overflow-y:auto;"></div>
+      </div>
+
+      <!-- Anotações clínicas -->
+      <div style="margin-bottom:20px;">
+        <div class="modal-label" style="margin-bottom:8px;">Anotações clínicas</div>
+        <textarea id="pron-notas" class="obs-textarea" rows="5"
+          placeholder="Observações sobre a paciente, histórico de procedimentos, reações, preferências..."></textarea>
+      </div>
+
+      <!-- Anexos -->
+      <div>
+        <div class="modal-label" style="margin-bottom:8px;">Arquivos anexados</div>
+        <div id="pron-anexos-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+        <label style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:var(--surface-container-low);border:1.5px dashed var(--outline-variant);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--on-surface-variant);">
+          <span class="material-symbols-outlined" style="font-size:18px;">attach_file</span>
+          Anexar arquivo (foto, PDF)
+          <input type="file" id="pron-file-input" multiple accept="image/*,.pdf" style="display:none;" onchange="handleAnexo(event)"/>
+        </label>
+        <div style="font-size:11px;color:#a09080;margin-top:6px;">Arquivos são salvos localmente nesta sessão. Para armazenamento permanente, configure o Supabase Storage.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" onclick="closeModal('modal-prontuario')">Fechar</button>
+      <button class="modal-submit-btn" onclick="saveProntuario()">
+        <span class="material-symbols-outlined" style="font-size:18px;">save</span>
+        Salvar prontuário
+      </button>
+    </div>
+  </div>
+</div>
+
+    <!-- ══ BLOQUEIOS ══ -->
+    <div class="page" id="page-bloqueios">
+      <div class="page-title">Gestão de Bloqueios</div>
+      <div class="page-subtitle">Configure períodos de indisponibilidade na agenda para feriados ou ausências.</div>
+      <div style="display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start;flex-wrap:wrap;">
+        <div class="table-card" style="padding:24px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-weight:700;color:var(--primary);">
+            <span class="material-symbols-outlined" style="color:var(--primary-container);">event_busy</span>
+            Adicionar Bloqueio
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Data do Bloqueio</label>
+            <div class="modal-input-wrap">
+              <span class="modal-input-icon material-symbols-outlined">calendar_month</span>
+              <input class="modal-input" type="date" id="bl-data"/>
+            </div>
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Horário (vazio = dia inteiro)</label>
+            <div class="modal-input-wrap">
+              <span class="modal-input-icon material-symbols-outlined">schedule</span>
+              <input class="modal-input" type="time" id="bl-hora"/>
+            </div>
+          </div>
+          <div class="modal-field">
+            <label class="modal-label">Motivo (opcional)</label>
+            <textarea class="obs-textarea" id="bl-motivo" placeholder="Ex: Manutenção da sala" rows="3"></textarea>
+          </div>
+          <button class="modal-submit-btn" style="width:100%;justify-content:center;" onclick="addBloqueio()">
+            <span class="material-symbols-outlined" style="font-size:18px;">lock</span>
+            Bloquear
+          </button>
+        </div>
+        <div class="table-card" id="bloqueios-list">
+          <div class="loading-row">Carregando bloqueios...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CONFIGURAÇÕES (placeholder) ══ -->
+    <div class="page" id="page-configuracoes">
+  <div class="page-title">Configurações</div>
+  <div class="page-subtitle">Personalize o painel administrativo.</div>
+
+  <div style="display:flex;flex-direction:column;gap:20px;max-width:480px;">
+
+    <!-- Nome da clínica -->
+    <div class="table-card" style="padding:28px;">
+      <div style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:18px;display:flex;align-items:center;gap:8px;">
+        <span class="material-symbols-outlined">badge</span> Nome exibido
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" style="margin-bottom:6px;">Nome na barra de navegação</label>
+        <input class="modal-input no-icon" id="cfg-nome" type="text" placeholder="Arleane Carvalho"/>
+      </div>
+      <button class="modal-submit-btn" style="margin-top:4px;" onclick="saveCfgNome()">
+        <span class="material-symbols-outlined" style="font-size:18px;">save</span>
+        Salvar nome
+      </button>
+    </div>
+
+    <!-- Foto do perfil -->
+    <div class="table-card" style="padding:28px;">
+      <div style="font-size:15px;font-weight:700;color:var(--primary);margin-bottom:18px;display:flex;align-items:center;gap:8px;">
+        <span class="material-symbols-outlined">account_circle</span> Foto do perfil
+      </div>
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
+        <div id="cfg-avatar-preview" style="width:64px;height:64px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;overflow:hidden;flex-shrink:0;border:2px solid var(--border);">
+          AC
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1c1108;margin-bottom:4px;">Foto atual</div>
+          <div style="font-size:11px;color:#a09080;">JPG ou PNG, máx. 2MB</div>
+        </div>
+      </div>
+      <label style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:var(--surface-container-low);border:1.5px dashed var(--outline-variant);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--on-surface-variant);">
+        <span class="material-symbols-outlined" style="font-size:18px;">upload</span>
+        Escolher foto
+        <input type="file" id="cfg-foto-input" accept="image/*" style="display:none;" onchange="saveCfgFoto(event)"/>
+      </label>
+      <button onclick="removeCfgFoto()" style="margin-left:10px;padding:10px 18px;background:none;border:1px solid var(--border);border-radius:10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;">
+        Remover foto
+      </button>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ════════════════════════════
+     MODAL NOVO AGENDAMENTO
+════════════════════════════ -->
+<div class="modal-overlay" id="modal-novo">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Novo Agendamento</div>
+        <div class="modal-subtitle">Preencha os dados abaixo para reservar um horário.</div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('modal-novo')">
+        <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-field">
+        <label class="modal-label">Nome do Paciente</label>
+        <div class="modal-input-wrap">
+          <span class="modal-input-icon material-symbols-outlined">person</span>
+          <input class="modal-input" id="nv-nome" type="text" placeholder="Ex: Maria Oliveira"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">WhatsApp</label>
+        <div class="modal-input-wrap">
+          <span class="modal-input-icon material-symbols-outlined">phone</span>
+          <input class="modal-input" id="nv-wa" type="tel" placeholder="(11) 99999-9999"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">E-mail (opcional)</label>
+        <div class="modal-input-wrap">
+          <span class="modal-input-icon material-symbols-outlined">mail</span>
+          <input class="modal-input" id="nv-email" type="email" placeholder="email@exemplo.com"/>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Serviço</label>
+        <div class="modal-input-wrap">
+          <span class="modal-input-icon material-symbols-outlined">spa</span>
+          <select class="modal-input" id="nv-servico">
+            <option value="">Selecione um serviço</option>
+            <option>Avaliação Grátis</option>
+            <option>Camuflagem de Cicatrizes</option>
+            <option>Camuflagem de Estrias</option>
+            <option>Micropigmentação Paramédica</option>
+            <option>Micropigmentação de Lábios</option>
+            <option>Micropigmentação de Sobrancelhas</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-input-row">
+        <div class="modal-field">
+          <label class="modal-label">Data</label>
+          <div class="modal-input-wrap">
+            <span class="modal-input-icon material-symbols-outlined">calendar_month</span>
+            <input class="modal-input" id="nv-data" type="date"/>
+          </div>
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Horário</label>
+          <div class="modal-input-wrap">
+            <span class="modal-input-icon material-symbols-outlined">schedule</span>
+            <input class="modal-input" id="nv-hora" type="time"/>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-cancel-btn" onclick="closeModal('modal-novo')">Cancelar</button>
+      <button class="modal-submit-btn" onclick="criarAgendamento()">
+        <span class="material-symbols-outlined" style="font-size:18px;">check_circle</span>
+        Criar Agendamento
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════
+     MODAL DETALHES
+════════════════════════════ -->
+<div class="modal-overlay" id="modal-detalhe">
+  <div class="modal-box detail-modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Detalhes do Agendamento</div>
+        <div class="modal-subtitle" id="dt-protocolo"></div>
+      </div>
+      <button class="modal-close-btn" onclick="closeModal('modal-detalhe')">
+        <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+      </button>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div class="detail-field-label">Nome do Cliente</div>
+        <div class="detail-client-row">
+          <div class="detail-initials" id="dt-initials"></div>
+          <div class="detail-name" id="dt-nome"></div>
+        </div>
+      </div>
+      <div>
+        <div class="detail-field-label">Serviço</div>
+        <div class="service-tag">
+          <span class="material-symbols-outlined" style="font-size:15px;color:var(--outline);">spa</span>
+          <span id="dt-servico"></span>
+        </div>
+      </div>
+      <div>
+        <div class="detail-field-label">Data &amp; Horário</div>
+        <div class="detail-field-val with-icon" style="white-space:nowrap;flex-wrap:nowrap;">
+         <span class="material-symbols-outlined" style="color:var(--tertiary);font-size:16px;flex-shrink:0;">calendar_month</span>
+         <span id="dt-data" style="font-size:13px;"></span>
+         <span style="color:#a09080;flex-shrink:0;">•</span>
+        <strong id="dt-hora" style="flex-shrink:0;"></strong>
+        </div>
+      </div>
+      <div>
+        <div class="detail-field-label">Status</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="status-dot" id="dt-dot"></div>
+          <span class="status-label-inline" id="dt-status-label"></span>
+        </div>
+      </div>
+      <div>
+        <div class="detail-field-label">WhatsApp</div>
+        <div class="detail-field-val with-icon">
+          <span class="material-symbols-outlined" style="color:#15803d;font-size:16px;">chat</span>
+          <span id="dt-wa"></span>
+        </div>
+      </div>
+      <div>
+        <div class="detail-field-label">E-mail</div>
+        <div class="detail-field-val with-icon">
+          <span class="material-symbols-outlined" style="font-size:16px;">mail</span>
+          <span id="dt-email"></span>
+        </div>
+      </div>
+    </div>
+    <div class="obs-block">
+      <div class="obs-label">Observações</div>
+      <textarea class="obs-textarea" id="dt-obs" placeholder="Anotações internas sobre este agendamento..."></textarea>
+      <button onclick="saveObs()" style="margin-top:8px;padding:7px 16px;background:var(--surface-container);border:none;border-radius:8px;font-size:12px;font-weight:600;color:var(--primary-container);cursor:pointer;">
+        Salvar obs.
+      </button>
+    </div>
+    <div class="detail-footer">
+      <button class="detail-action-btn btn-cancel" id="dt-btn-cancel" onclick="modalUpdateStatus('cancelado')">
+        <span class="material-symbols-outlined" style="font-size:16px;">cancel</span>
+        Cancelar
+      </button>
+      <button class="detail-action-btn btn-confirm" id="dt-btn-confirm" onclick="modalUpdateStatus('confirmado')">
+        <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
+        Confirmar
+      </button>
+      <button class="detail-action-btn btn-wa" id="dt-btn-wa" onclick="openWAFromModal()">
+        <span class="material-symbols-outlined" style="font-size:16px;">send</span>
+        WhatsApp
+      </button>
+      <button class="detail-action-btn btn-done" id="dt-btn-done" onclick="modalUpdateStatus('concluido')">
+        <span class="material-symbols-outlined" style="font-size:16px;">task_alt</span>
+        Concluir
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════
+     SCRIPT
+════════════════════════════ -->
+<script>
+/* ═══════════════════════
+   CONFIGURE AQUI
+═══════════════════════ */
+const SUPA_URL = 'https://ssiwvczvebitxbeiurqc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzaXd2Y3p2ZWJpdHhiZWl1cnFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNDk1OTksImV4cCI6MjA4ODkyNTU5OX0.zSit8VsVRSBZJUgtcrkt-uLKfEL9MQGtWNVUKHNEEFc';
+
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+/* ═══════════════════════
+   ESTADO
+═══════════════════════ */
+let allAg      = [];
+let curFilter  = 'todos';
+let curPage    = 1;
+const PER_PAGE = 10;
+let openId     = null;
+
+/* ═══════════════════════
+   AUTH
+═══════════════════════ */
+(async()=>{
+  const {data:{session}} = await sb.auth.getSession();
+  if(session) bootApp(session);
+})();
+
+async function doLogin(){
+  const email = document.getElementById('le').value.trim();
+  const pass  = document.getElementById('lp').value;
+  const err   = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+  err.textContent=''; btn.textContent='Entrando...'; btn.disabled=true;
+  const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
+  btn.innerHTML='<span class="material-symbols-outlined" style="font-size:18px;">lock_open</span> Entrar';
+  btn.disabled=false;
+  if(error){err.textContent='E-mail ou senha incorretos.';return;}
+  bootApp(data.session);
+}
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+async function doLogout(){
+  await sb.auth.signOut();
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+}
+
+function bootApp(session){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  const email = session.user?.email||'';
+  const initAv = email.substring(0,2).toUpperCase();
+  document.getElementById('user-avatar').textContent = initAv;
+  const mobAv = document.getElementById('mob-avatar');
+  if(mobAv) mobAv.textContent = initAv;
+  loadAgendamentos();
+  loadBloqueios();
+  startRealtime();
+  setInterval(loadAgendamentos, 60000);
+  setTimeout(renderCfgServicos, 500);
+  setTimeout(loadCfgPerfil, 100);
+}
+
+/* ═══════════════════════
+   NAVEGAÇÃO
+═══════════════════════ */
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(id === 'pacientes') renderPacientes();
+  if(id === 'bloqueios') loadBloqueios();
+  if(id === 'configuracoes') renderCfgServicos();
+  /* sincroniza bottom nav mobile */
+  document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+  const mob = document.getElementById('mobnav-'+id);
+  if(mob) mob.classList.add('active');
+}
+
+/* ═══════════════════════
+   AGENDAMENTOS — LOAD
+═══════════════════════ */
+async function loadAgendamentos(){
+  const {data,error}=await sb.from('agendamentos').select('*')
+    .order('status',{ascending:true})
+    .order('data_desejada',{ascending:true})
+    .order('horario',{ascending:true});
+  if(error){showToast('Erro ao carregar','err');return;}
+  allAg=data||[];
+  updateStats();
+  renderTable();
+}
+
+function updateStats(){
+  const today=new Date().toISOString().split('T')[0];
+  const now=new Date();
+  const hoje=allAg.filter(a=>a.data_desejada===today).length;
+  const pend=allAg.filter(a=>a.status==='pendente').length;
+  const conf=allAg.filter(a=>a.status==='confirmado').length;
+  const mes =allAg.filter(a=>{
+    const d=new Date(a.data_desejada);
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  }).length;
+  document.getElementById('st-hoje').textContent=hoje;
+  document.getElementById('st-pend').textContent=pend;
+  document.getElementById('st-conf').textContent=conf;
+  document.getElementById('st-mes').textContent=mes;
+  const pct=allAg.length?Math.round((conf/allAg.length)*100):0;
+  document.getElementById('ocupacao-pct').textContent=pct+'%';
+  document.getElementById('ocupacao-bar').style.width=pct+'%';
+}
+
+/* ═══════════════════════
+   TABELA
+═══════════════════════ */
+function setFilter(f,el){
+  curFilter=f;curPage=1;
+  document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function getFiltered(){
+  const q=(document.getElementById('search-input')?.value||'').toLowerCase();
+  const ORDER={pendente:0,confirmado:1,concluido:2,cancelado:3};
+  return allAg
+    .filter(a=>curFilter==='todos'||a.status===curFilter)
+    .filter(a=>!q||(a.nome||'').toLowerCase().includes(q))
+    .sort((a,b)=>(ORDER[a.status]??9)-(ORDER[b.status]??9));
+}
+
+function renderTable(){
+  const list=getFiltered();
+  const total=list.length;
+  const pages=Math.max(1,Math.ceil(total/PER_PAGE));
+  if(curPage>pages)curPage=1;
+  const slice=list.slice((curPage-1)*PER_PAGE,curPage*PER_PAGE);
+
+  document.getElementById('page-count').textContent=
+    `Exibindo ${slice.length} de ${total} agendamentos`;
+
+  const tbody=document.getElementById('table-body');
+  if(!slice.length){
+    tbody.innerHTML='<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div>Nenhum agendamento encontrado.</div></td></tr>';
+  } else {
+    tbody.innerHTML=slice.map(a=>`
+      <tr>
+        <td>
+          <div class="client-cell">
+            <div class="initials">${initials(a.nome)}</div>
+            <div>
+              <div class="client-name">${esc(a.nome)}</div>
+              <div class="client-phone">${esc(a.whatsapp)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="service-text">${esc(a.servico)}</span></td>
+        <td><span class="date-text">${fmtDate(a.data_desejada)}</span></td>
+        <td><span class="time-text">${esc(a.horario)}</span></td>
+        <td><span class="badge badge-${a.status}">${labelStatus(a.status)}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="action-icon confirm" title="Confirmar"
+              ${a.status==='confirmado'?'disabled':''} onclick="quickUpdate('${a.id}','confirmado')">
+              <span class="material-symbols-outlined">check_circle</span>
+            </button>
+            <button class="action-icon cancel" title="Cancelar"
+              ${a.status==='cancelado'?'disabled':''} onclick="quickUpdate('${a.id}','cancelado')">
+              <span class="material-symbols-outlined">cancel</span>
+            </button>
+            <button class="action-icon done" title="Concluído"
+              ${a.status==='concluido'?'disabled':''} onclick="quickUpdate('${a.id}','concluido')">
+              <span class="material-symbols-outlined">done_all</span>
+            </button>
+            <button class="action-icon whatsapp" title="WhatsApp"
+              onclick="openWA('${esc(a.nome)}','${esc(a.whatsapp)}','${fmtDate(a.data_desejada)}','${esc(a.horario)}','${a.status}')">
+              <span class="material-symbols-outlined">chat</span>
+            </button>
+            <button class="action-icon" title="Detalhes" onclick="openDetail('${a.id}')">
+              <span class="material-symbols-outlined">open_in_new</span>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  /* paginação */
+  const pb=document.getElementById('page-btns');
+  pb.innerHTML='';
+  if(curPage>1){
+    const prev=document.createElement('button');
+    prev.className='page-btn page-btn-arrow';
+    prev.innerHTML='<span class="material-symbols-outlined" style="font-size:16px;">chevron_left</span>';
+    prev.onclick=()=>{curPage--;renderTable();};
+    pb.appendChild(prev);
+  }
+  for(let i=1;i<=pages;i++){
+    const b=document.createElement('button');
+    b.className='page-btn'+(i===curPage?' active':'');
+    b.textContent=i;
+    b.onclick=(()=>{const p=i;return()=>{curPage=p;renderTable();};})();
+    pb.appendChild(b);
+  }
+  if(curPage<pages){
+    const next=document.createElement('button');
+    next.className='page-btn page-btn-arrow';
+    next.innerHTML='<span class="material-symbols-outlined" style="font-size:16px;">chevron_right</span>';
+    next.onclick=()=>{curPage++;renderTable();};
+    pb.appendChild(next);
+  }
+}
+
+/* ═══════════════════════
+   UPDATE STATUS RÁPIDO
+═══════════════════════ */
+async function quickUpdate(id,status){
+  event.stopPropagation();
+  const {error}=await sb.from('agendamentos').update({status}).eq('id',id);
+  if(error){showToast('Erro ao atualizar','err');return;}
+  showToast('Status: '+labelStatus(status),'ok');
+  await loadAgendamentos();
+}
+
+/* ═══════════════════════
+   CRIAR AGENDAMENTO
+═══════════════════════ */
+function openNovoAg(){
+  document.getElementById('nv-nome').value='';
+  document.getElementById('nv-wa').value='';
+  document.getElementById('nv-email').value='';
+  document.getElementById('nv-servico').value='';
+  document.getElementById('nv-data').value='';
+  document.getElementById('nv-hora').value='';
+  openModal('modal-novo');
+}
+
+async function criarAgendamento(){
+  const nome  = document.getElementById('nv-nome').value.trim();
+  const wa    = document.getElementById('nv-wa').value.trim();
+  const email = document.getElementById('nv-email').value.trim();
+  const serv  = document.getElementById('nv-servico').value;
+  const data  = document.getElementById('nv-data').value;
+  const hora  = document.getElementById('nv-hora').value;
+  if(!nome||!wa||!serv||!data||!hora){ showToast('Preencha todos os campos obrigatórios','err'); return; }
+
+  /* calcula slots ocupados pelo novo agendamento */
+  const dur = cfgServicos.find(s => s.nome === serv)?.dur || 60;
+  const [h, m] = hora.split(':').map(Number);
+  const inicioMin = h * 60 + m;
+  const fimMin    = inicioMin + dur;
+  const fimHora   = `${String(Math.floor(fimMin/60)).padStart(2,'0')}:${String(fimMin%60).padStart(2,'0')}`;
+
+  /* verifica conflito com agendamentos existentes */
+  const { data: existentes } = await sb.from('agendamentos')
+    .select('horario, servico')
+    .eq('data_desejada', data)
+    .in('status', ['pendente','confirmado']);
+
+  const conflito = (existentes||[]).some(ag => {
+    const durAg = cfgServicos.find(s => s.nome === ag.servico)?.dur || 60;
+    const [ah, am] = ag.horario.split(':').map(Number);
+    const agIni = ah * 60 + am;
+    const agFim = agIni + durAg;
+    return inicioMin < agFim && fimMin > agIni;
+  });
+
+  if(conflito){ showToast('Conflito de horário! Existe outro agendamento nesse período.','err'); return; }
+
+  const { error } = await sb.from('agendamentos').insert({
+    nome, whatsapp: wa, email, servico: serv,
+    data_desejada: data, horario: hora, status: 'pendente'
+  });
+  if(error){ showToast('Erro ao criar: '+error.message,'err'); return; }
+  showToast('Agendamento criado!','ok');
+  /* notifica Arleane por email */
+try {
+  emailjs.init('IHm2aq6QaS99i0Ssi');
+  emailjs.send('service_d1ya7xl', 'template_0rgudu9', {
+    nome,
+    whatsapp: wa,
+    servico: serv,
+    data: fmtDate(data),
+    horario: hora
+  });
+} catch(e){ console.warn('EmailJS:', e); }
+  closeModal('modal-novo');
+  await loadAgendamentos();
+}
+
+/* ═══════════════════════
+   MODAL DETALHES
+═══════════════════════ */
+function openDetail(id){
+  const a=allAg.find(x=>x.id===id);
+  if(!a)return;
+  openId=id;
+  document.getElementById('dt-protocolo').textContent='ID: '+id.substring(0,8).toUpperCase();
+  document.getElementById('dt-initials').textContent=initials(a.nome);
+  document.getElementById('dt-nome').textContent=a.nome;
+  document.getElementById('dt-servico').textContent=a.servico;
+  document.getElementById('dt-data').textContent=fmtDate(a.data_desejada);
+  document.getElementById('dt-hora').textContent=a.horario;
+  document.getElementById('dt-wa').textContent=a.whatsapp;
+  document.getElementById('dt-email').textContent=a.email||'—';
+  document.getElementById('dt-obs').value=a.observacoes||'';
+  setDetailStatus(a.status);
+  openModal('modal-detalhe');
+}
+
+function setDetailStatus(status){
+  const dotEl=document.getElementById('dt-dot');
+  const lblEl=document.getElementById('dt-status-label');
+  const dotMap={pendente:'',confirmado:'confirmed',cancelado:'canceled',concluido:'done'};
+  dotEl.className='status-dot '+(dotMap[status]||'');
+  lblEl.textContent=labelStatus(status);
+  document.getElementById('dt-btn-confirm').disabled=status==='confirmado';
+  document.getElementById('dt-btn-cancel').disabled=status==='cancelado';
+  document.getElementById('dt-btn-done').disabled=status==='concluido';
+}
+
+async function modalUpdateStatus(status){
+  if(!openId)return;
+  const {error}=await sb.from('agendamentos').update({status}).eq('id',openId);
+  if(error){showToast('Erro ao atualizar','err');return;}
+  showToast('Status: '+labelStatus(status),'ok');
+  const idx=allAg.findIndex(a=>a.id===openId);
+  if(idx>-1)allAg[idx].status=status;
+  setDetailStatus(status);
+  renderTable();
+  updateStats();
+}
+
+async function saveObs(){
+  if(!openId)return;
+  const obs=document.getElementById('dt-obs').value;
+  const {error}=await sb.from('agendamentos').update({observacoes:obs}).eq('id',openId);
+  if(error){showToast('Erro ao salvar','err');return;}
+  const idx=allAg.findIndex(a=>a.id===openId);
+  if(idx>-1)allAg[idx].observacoes=obs;
+  showToast('Observação salva!','ok');
+}
+
+function openWAFromModal(){
+  const a=allAg.find(x=>x.id===openId);
+  if(!a)return;
+  openWA(a.nome,a.whatsapp,fmtDate(a.data_desejada),a.horario,a.status);
+}
+
+/* ═══════════════════════
+   WHATSAPP
+═══════════════════════ */
+function openWA(nome,wa,data,hora,status){
+  const num=wa.replace(/\D/g,'');
+  let msg='';
+  if(status==='cancelado'){
+    msg=`Olá, ${nome}, infelizmente precisamos cancelar seu agendamento que estava marcado para o dia ${data} às ${hora}. Em breve entraremos em contato para reagendar.\n\nStudio Arleane Carvalho. `;
+  } else {
+    msg=`Olá, ${nome}! 😊\n\nEstou confirmando seu agendamento:\n📅 Data: ${data}\n🕐 Horário: ${hora}\n\nQualquer dúvida é só chamar!\n\nStudio Arleane Carvalho.`;
+  }
+  window.open(`https://wa.me/55${num}?text=${encodeURIComponent(msg)}`,'_blank');
+}
+
+/* ═══════════════════════
+   BLOQUEIOS
+═══════════════════════ */
+async function addBloqueio(){
+  const data_bloq = document.getElementById('bl-data').value;
+  const horario   = document.getElementById('bl-hora').value || null;
+  const motivo    = document.getElementById('bl-motivo').value.trim() || null;
+  if(!data_bloq){ showToast('Selecione uma data','err'); return; }
+  
+  console.log('Inserindo bloqueio:', { data_bloq, horario, motivo });
+  
+  const { data, error } = await sb.from('bloqueios')
+    .insert({ data_bloq, horario, motivo })
+    .select();
+    
+  console.log('Resultado:', data, error);
+  
+  if(error){ showToast('Erro: '+error.message,'err'); return; }
+  showToast('Bloqueio adicionado!','ok');
+  document.getElementById('bl-data').value   = '';
+  document.getElementById('bl-hora').value   = '';
+  document.getElementById('bl-motivo').value = '';
+  loadBloqueios();
+}
+
+async function loadBloqueios(){
+  const { data, error } = await sb
+    .from('bloqueios')
+    .select('*')
+    .order('data_bloq', { ascending: true });
+    
+  console.log('Bloqueios carregados:', data, error);
+  
+  const wrap = document.getElementById('bloqueios-list');
+  if(!data || !data.length){
+    wrap.innerHTML = `
+      <div style="text-align:center;padding:48px 20px;">
+        <div style="font-size:40px;opacity:.25;margin-bottom:10px;">🔓</div>
+        <div style="font-size:13px;color:#a09080;">Nenhum bloqueio cadastrado.</div>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = `
+    <div style="padding:16px 24px 8px;display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#a09080;">Bloqueios ativos</span>
+      <span style="background:#e7e0db;padding:3px 10px;border-radius:9999px;color:var(--primary);font-size:10px;font-weight:700;">${data.length} ATIVOS</span>
+    </div>
+    ${data.map(b => `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-top:1px solid #faf6f3;">
+        <div style="display:flex;gap:16px;align-items:center;">
+          <div style="text-align:center;min-width:44px;background:#f4f0ec;border-radius:12px;padding:8px 6px;">
+            <div style="font-size:9px;font-weight:700;color:#a09080;text-transform:uppercase;letter-spacing:.5px;">${fmtMes(b.data_bloq)}</div>
+            <div style="font-size:20px;font-weight:800;color:var(--primary);line-height:1.1;">${fmtDia(b.data_bloq)}</div>
+          </div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#1c1108;">${esc(b.motivo||'Bloqueio')}</div>
+            <div style="font-size:12px;color:#a09080;margin-top:2px;">
+              ${b.horario ? b.horario : 'Dia inteiro'} • ${fmtDiaSemana(b.data_bloq)}
+            </div>
+          </div>
+        </div>
+        <button onclick="delBloqueio('${b.id}')"
+          style="background:none;border:none;cursor:pointer;color:#c4b0a8;padding:8px;border-radius:8px;"
+          onmouseover="this.style.background='#fef2f2';this.style.color='#991b1b'"
+          onmouseout="this.style.background='none';this.style.color='#c4b0a8'">
+          <span class="material-symbols-outlined">delete</span>
+        </button>
+      </div>
+    `).join('')}
+  `;
+}
+
+async function delBloqueio(id){
+  const { error } = await sb.from('bloqueios').delete().eq('id',id);
+  if(error){ showToast('Erro ao remover','err'); return; }
+  showToast('Bloqueio removido','ok');
+  loadBloqueios();
+}
+
+/* ═══════════════════════
+   REALTIME
+═══════════════════════ */
+function startRealtime(){
+  sb.channel('ag-changes')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'agendamentos'},payload=>{
+      showToast('🔔 Novo agendamento: '+(payload.new.nome||''),'ok');
+      loadAgendamentos();
+    })
+    .subscribe();
+}
+
+/* ═══════════════════════
+   MODAL HELPERS
+═══════════════════════ */
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');});
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+});
+
+/* ═══════════════════════
+   TOAST
+═══════════════════════ */
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+(type||'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+/* ═══════════════════════
+   HELPERS
+═══════════════════════ */
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function initials(n){if(!n)return'?';const p=n.trim().split(' ');return(p[0]?.[0]||'')+(p[1]?.[0]||'');}
+function labelStatus(s){return{pendente:'Pendente',confirmado:'Confirmado',cancelado:'Cancelado',concluido:'Concluído'}[s]||s;}
+function fmtDate(s){
+  if(!s)return'—';
+  const d=s.includes('T')?new Date(s):new Date(s+'T00:00:00');
+  return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+}
+function fmtDia(s){ if(!s)return'—'; const d=new Date(s+'T00:00:00'); return String(d.getDate()).padStart(2,'0'); }
+function fmtMes(s){ if(!s)return'—'; const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('pt-BR',{month:'short'}).toUpperCase().replace('.',''); }
+function fmtDiaSemana(s){ if(!s)return'—'; const d=new Date(s+'T00:00:00'); return d.toLocaleDateString('pt-BR',{weekday:'long'}); }
+
+/* ═══════════════════════
+   PACIENTES + PRONTUÁRIO
+═══════════════════════ */
+let prontuarios = JSON.parse(localStorage.getItem('prontuarios') || '{}');
+let pronPacKey  = null;
+
+function buildPacientes(){
+  const map = {};
+  allAg.forEach(a => {
+    const key = (a.whatsapp || a.nome || '').trim();
+    if(!map[key]) map[key] = { nome: a.nome, wa: a.whatsapp, servicos: [], datas: [], ids: [] };
+    map[key].servicos.push(a.servico);
+    map[key].datas.push(a.data_desejada);
+    map[key].ids.push(a.id);
+  });
+  return Object.values(map).sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+}
+
+function renderPacientes(){
+  const q = (document.getElementById('pac-search')?.value||'').toLowerCase();
+  const list = buildPacientes().filter(p => (p.nome||'').toLowerCase().includes(q));
+  const tbody = document.getElementById('pac-body');
+  if(!list.length){
+    tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><div class="empty-icon">👤</div>Nenhum paciente encontrado.</div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(p => {
+    const sorted = [...p.datas].sort().reverse();
+    const ultima = sorted[0] ? fmtDate(sorted[0]) : '—';
+    const idxUlt = p.datas.indexOf(sorted[0]);
+    const ultimo = p.servicos[idxUlt] || '—';
+    const key    = (p.wa||p.nome||'').trim();
+    const temPron = prontuarios[key]?.notas;
+    return `
+      <tr>
+        <td>
+          <div class="client-cell">
+            <div class="initials">${initials(p.nome)}</div>
+            <div>
+              <div class="client-name">${esc(p.nome)}</div>
+              <div class="client-phone">${esc(p.wa)}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="service-text">${esc(ultimo)}</span></td>
+        <td><span class="date-text">${ultima}</span></td>
+        <td><span class="badge badge-confirmado">${p.datas.length} visita${p.datas.length>1?'s':''}</span></td>
+        <td style="text-align:right">
+          <td style="text-align:left">
+  <div style="display:flex;gap:8px;align-items:center;padding-left:0;flex-wrap:wrap;">
+    <button class="action-icon" title="Prontuário" 
+      style="width:36px;height:36px;border-radius:10px;background:#f4f0ec;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;"
+      onclick="openProntuario('${esc(key)}','${esc(p.nome)}','${esc(p.wa)}')">
+      <span class="material-symbols-outlined" style="font-size:18px;${temPron?'color:var(--primary-container);font-variation-settings:\'FILL\' 1':''}" >assignment</span>
+    </button>
+    <button class="action-icon whatsapp" title="WhatsApp"
+      style="width:36px;height:36px;border-radius:10px;background:#f0fdf4;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#15803d;"
+      onclick="openWA('${esc(p.nome)}','${esc(p.wa)}','','','')">
+      <span class="material-symbols-outlined" style="font-size:18px;">chat</span>
+    </button>
+  </div>
+</td>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function saveProntuario(){
+  if(!pronPacKey) return;
+  const notas = document.getElementById('pron-notas').value;
+  const { data: existing } = await sb.from('prontuarios')
+    .select('id').eq('paciente_key', pronPacKey).maybeSingle();
+  const { error } = existing
+    ? await sb.from('prontuarios').update({ notas, atualizado_em: new Date().toISOString() }).eq('paciente_key', pronPacKey)
+    : await sb.from('prontuarios').insert({ paciente_key: pronPacKey, notas });
+  if(error){ showToast('Erro: '+error.message,'err'); return; }
+  showToast('Prontuário salvo!','ok');
+}
+
+async function openProntuario(key, nome, wa){
+  pronPacKey = key;
+  document.getElementById('pron-subtitle').textContent = nome + (wa ? ' • '+wa : '');
+
+  const agsPac = allAg
+    .filter(a => (a.whatsapp||a.nome||'').trim() === key)
+    .sort((a,b) => (b.data_desejada||'').localeCompare(a.data_desejada||''));
+
+  document.getElementById('pron-historico').innerHTML = agsPac.length
+    ? agsPac.map(a=>`
+        <div style="display:flex;gap:12px;align-items:center;padding:8px 12px;background:#faf8f6;border-radius:8px;border:1px solid #e7e0db;flex-wrap:wrap;">
+          <span class="badge badge-${a.status}" style="flex-shrink:0;">${labelStatus(a.status)}</span>
+          <span style="font-size:12px;font-weight:600;color:#1c1108;">${esc(a.servico)}</span>
+          <span style="font-size:11px;color:#a09080;margin-left:auto;">${fmtDate(a.data_desejada)} ${a.horario||''}</span>
+        </div>`).join('')
+    : '<div style="font-size:12px;color:#a09080;">Nenhum agendamento encontrado.</div>';
+
+  const { data: pron } = await sb.from('prontuarios')
+    .select('notas')
+    .eq('paciente_key', key)
+    .maybeSingle();
+
+  document.getElementById('pron-notas').value = pron?.notas || '';
+
+  await renderAnexos(key);
+  openModal('modal-prontuario');
+}
+
+async function renderAnexos(key){
+  const el = document.getElementById('pron-anexos-list');
+  if(!el) return;
+
+  el.innerHTML = '<div style="font-size:12px;color:#a09080;">Carregando arquivos...</div>';
+
+  const { data, error } = await sb.storage
+    .from('prontuarios')
+    .list(key, { sortBy: { column: 'created_at', order: 'desc' } });
+
+  if(error || !data || !data.length){
+    el.innerHTML = '<div style="font-size:12px;color:#a09080;">Nenhum arquivo anexado.</div>';
+    return;
+  }
+
+  el.innerHTML = data.map(f => {
+    const { data: urlData } = sb.storage.from('prontuarios').getPublicUrl(`${key}/${f.name}`);
+    const isPdf = f.name.toLowerCase().endsWith('.pdf');
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#faf8f6;border:1px solid #e7e0db;border-radius:8px;">
+        <span class="material-symbols-outlined" style="font-size:18px;color:var(--outline);">${isPdf?'picture_as_pdf':'image'}</span>
+        <span style="font-size:12px;font-weight:600;color:#1c1108;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(f.name)}</span>
+        <a href="${urlData.publicUrl}" target="_blank"
+           style="font-size:11px;color:var(--primary-container);font-weight:600;white-space:nowrap;text-decoration:none;">
+          Ver
+        </a>
+        <button onclick="deleteAnexo('${key}','${f.name}')"
+          style="background:none;border:none;cursor:pointer;color:#c4b0a8;padding:2px;">
+          <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+        </button>
+      </div>`;
+  }).join('');
+}
+
+async function handleAnexo(event){
+  if(!pronPacKey) return;
+  const files = Array.from(event.target.files);
+  for(const f of files){
+    const path = `${pronPacKey}/${Date.now()}_${f.name}`;
+    const { error } = await sb.storage.from('prontuarios').upload(path, f, { upsert: true });
+    if(error){ showToast('Erro no upload: '+error.message,'err'); continue; }
+    showToast(`${f.name} enviado!`,'ok');
+  }
+  event.target.value = '';
+  await renderAnexos(pronPacKey);
+}
+
+async function deleteAnexo(key, name){
+  const { error } = await sb.storage.from('prontuarios').remove([`${key}/${name}`]);
+  if(error){ showToast('Erro ao remover: '+error.message,'err'); return; }
+  showToast('Arquivo removido','ok');
+  await renderAnexos(key);
+}
+/* ═══════════════════════
+   CONFIGURAÇÕES — nome e foto
+═══════════════════════ */
+function loadCfgPerfil(){
+  const nome = localStorage.getItem('cfg_nome') || 'Arleane Carvalho';
+  const foto  = localStorage.getItem('cfg_foto') || '';
+
+  /* aplica nome */
+  document.getElementById('cfg-nome').value = nome;
+  document.getElementById('sidebar-brand').textContent = nome;
+  document.getElementById('mobile-header-name').textContent = nome;
+
+  /* aplica foto */
+  applyFoto(foto);
+}
+
+function applyFoto(dataUrl){
+  const avatarEl  = document.getElementById('user-avatar');
+  const mobAvEl   = document.getElementById('mob-avatar');
+  const prevEl    = document.getElementById('cfg-avatar-preview');
+  const initials  = (localStorage.getItem('cfg_nome')||'Arleane Carvalho').substring(0,2).toUpperCase();
+
+  if(dataUrl){
+    const imgTag = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;" alt="perfil"/>`;
+    if(avatarEl)  avatarEl.innerHTML  = imgTag;
+    if(mobAvEl)   mobAvEl.innerHTML   = imgTag;
+    if(prevEl)    prevEl.innerHTML    = imgTag;
+  } else {
+    if(avatarEl)  avatarEl.textContent  = initials;
+    if(mobAvEl)   mobAvEl.textContent   = initials;
+    if(prevEl)    prevEl.textContent    = initials;
+  }
+}
+
+function saveCfgNome(){
+  const nome = document.getElementById('cfg-nome').value.trim();
+  if(!nome){ showToast('Digite um nome','err'); return; }
+  localStorage.setItem('cfg_nome', nome);
+  document.getElementById('sidebar-brand').textContent = nome;
+  document.getElementById('mobile-header-name').textContent = nome;
+  showToast('Nome salvo!','ok');
+}
+
+function saveCfgFoto(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 2 * 1024 * 1024){ showToast('Foto muito grande (máx 2MB)','err'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    localStorage.setItem('cfg_foto', e.target.result);
+    applyFoto(e.target.result);
+    showToast('Foto salva!','ok');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeCfgFoto(){
+  localStorage.removeItem('cfg_foto');
+  applyFoto('');
+  showToast('Foto removida','ok');
+}
+
+function renderCfgServicos(){
+  const el = document.getElementById('cfg-servicos-list');
+  if(!el) return;
+  el.innerHTML = cfgServicos.map((s,i) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#faf8f6;border:1px solid #e7e0db;border-radius:10px;">
+      <div>
+        <span style="font-size:13px;font-weight:600;color:#1c1108;">${esc(s.nome)}</span>
+        <span style="font-size:11px;color:#a09080;margin-left:10px;">⏱ ${s.dur} min</span>
+      </div>
+      <button onclick="removeServicoCfg(${i})" style="background:none;border:none;cursor:pointer;color:#c4b0a8;" title="Remover">
+        <span class="material-symbols-outlined" style="font-size:18px;">delete</span>
+      </button>
+    </div>
+  `).join('');
+  /* atualiza o select do modal de novo agendamento */
+  const sel = document.getElementById('nv-servico');
+  if(sel){
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Selecione um serviço</option>' +
+      cfgServicos.map(s=>`<option value="${esc(s.nome)}">${esc(s.nome)} (${s.dur}min)</option>`).join('');
+    sel.value = cur;
+  }
+}
+
+function addServicoCfg(){
+  const nome = document.getElementById('cfg-srv-nome').value.trim();
+  const dur  = parseInt(document.getElementById('cfg-srv-dur').value)||60;
+  if(!nome){ showToast('Digite o nome do serviço','err'); return; }
+  cfgServicos.push({nome, dur});
+  localStorage.setItem('cfg_servicos', JSON.stringify(cfgServicos));
+  document.getElementById('cfg-srv-nome').value = '';
+  document.getElementById('cfg-srv-dur').value  = '';
+  renderCfgServicos();
+  showToast('Serviço adicionado!','ok');
+}
+
+function removeServicoCfg(i){
+  cfgServicos.splice(i,1);
+  localStorage.setItem('cfg_servicos', JSON.stringify(cfgServicos));
+  renderCfgServicos();
+}
+
+function saveCfgHorario(){
+  const open  = document.getElementById('cfg-open').value;
+  const close = document.getElementById('cfg-close').value;
+  localStorage.setItem('cfg_horario', JSON.stringify({open, close}));
+  showToast('Horários salvos!','ok');
+}
+
+/* chama no boot */
+setTimeout(renderCfgServicos, 500);
+
+function setMobNav(page){
+  document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('mobnav-'+page);
+  if(el) el.classList.add('active');
+}
+
+/* sincroniza avatar mobile com desktop */
+function syncMobHeader(){
+  const av = document.getElementById('mob-avatar');
+  const src = document.getElementById('user-avatar');
+  if(av && src) av.textContent = src.textContent;
+}
+
+</script>
+</body>
+</html>
